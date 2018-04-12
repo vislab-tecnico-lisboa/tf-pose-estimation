@@ -32,6 +32,10 @@ tf.app.flags.DEFINE_boolean("camera_frame", False, "Convert 3d poses to camera c
 tf.app.flags.DEFINE_boolean("max_norm", True, "Apply maxnorm constraint to the weights")
 tf.app.flags.DEFINE_boolean("batch_norm", True, "Use batch_normalization")
 
+tf.app.flags.DEFINE_string('model', '', '3D Model')
+tf.app.flags.DEFINE_string('resolution', '', 'Openpose resolution')
+tf.app.flags.DEFINE_string('camera', '', 'Openpose camera')
+
 # Data loading
 tf.app.flags.DEFINE_boolean("predict_14", False, "predict 14 joints")
 tf.app.flags.DEFINE_boolean("use_sh", False, "Use 2d pose predictions from StackedHourglass")
@@ -85,7 +89,7 @@ summaries_dir = os.path.join( train_dir, "log" ) # Directory for TB summaries
 # To avoid race conditions: https://github.com/tensorflow/tensorflow/issues/7448
 os.system('mkdir -p {}'.format(summaries_dir))
 
-def create_model( session, actions, batch_size ):
+def create_model( session, batch_size ):
   """
   Create model and initialize it or load its parameters in a session
 

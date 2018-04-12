@@ -5,12 +5,17 @@ import time
 import cv2
 import numpy as np
 import sys
-sys.path.append("C:/Users/laura/Downloads/tf-pose-estimation/src/baseline3d")
+sys.path.append("/home/avelino/3d_pose/tfopenpose/tf-pose-estimation/src/baseline3d")
 from estimator import TfPoseEstimator
 from networks import get_graph_path, model_wh
 import tensorflow as tf
-import predict_3dpose
+from baseline3d.predict_3dpose import create_model
 import data_utils
+import viz
+
+import matplotlib.pyplot as plt
+import matplotlib.gridspec as gridspec
+
 FLAGS = tf.app.flags.FLAGS
 
 order = [15, 12, 25, 26, 27, 17, 18, 19, 1, 2, 3, 6, 7, 8]
@@ -98,13 +103,48 @@ if __name__ == '__main__':
     session3d = tf.Session(config=tf.ConfigProto(device_count={"GPU": 1},
            allow_soft_placement=True))
     batch_size = 128
-    actions = data_utils.define_actions( FLAGS.action );
-    op3dgraph = predict_3dpose.create_model(session3d, actions, batch_size)
+
+
+    actions = data_utils.define_actions( FLAGS.action )
+    op3dgraph = create_model(session3d, batch_size)
+
+    ###FOR PLOTING
+    gs1 = gridspec.GridSpec(1, 1)
+    gs1.update(wspace=-0.00, hspace=0.05)  # set the spacing between axes.
+    ax = plt.subplot(gs1[0], projection='3d')
+    ax.view_init(18, -70) 
 
     logger.debug('cam read+')
     cam = cv2.VideoCapture(args.camera)
     ret_val, image = cam.read()
     logger.info('cam image=%dx%d' % (image.shape[1], image.shape[0]))
+
+    
+    #train_set_2d, test_set_2d, data_mean_2d, data_std_2d, dim_to_ignore_2d, dim_to_use_2d = data_utils.read_2d_predictions(
+    #actions, FLAGS.data_dir)
+    
+    data_mean_2d = np.array([534.23620678, 425.88147731, 533.39373118, 425.69835782, 534.39780234,
+    497.43802989, 532.48129382, 569.04662344, 0, 0,
+    0, 0, 535.29156558, 425.73629462, 532.76756177,
+    496.47315471, 530.88803412, 569.60750683, 0, 0,
+    0, 0, 0, 0, 535.75344606, 331.22677323, 536.33800053, 317.44992858, 0, 0, 536.71629464,
+    269.11969467, 0, 0, 536.36740264, 330.27798906, 535.85669709, 374.59944401, 534.70288482, 387.35266055,
+    0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 534.99202566, 331.77346527, 534.61130808, 373.81679139, 535.21529192,
+    379.50779675, 0, 0, 0, 0, 0, 0, 0, 0])
+
+    data_std_2d =  np.array([107.37361012, 61.63490959, 114.89497053,  61.91199702, 117.27565511, 
+    50.22711629, 118.89857526, 55.00005709, 0, 0,  0, 0, 102.91089763, 61.33852088, 106.66944715,
+    47.96084756, 108.13481259, 53.60647266, 0, 0,  0, 0, 0, 0, 110.56227428,
+    72.9166997, 110.84492972, 76.09916643, 0, 0, 115.08215261, 82.92943734, 0, 0, 105.04274864,
+    72.84070269, 106.3158104, 73.21929021, 108.08767528, 82.4948776, 0, 0, 0, 0, 0,
+    0, 0, 0, 0, 0, 124.31763034, 73.34214366, 132.80917569, 76.37108859, 131.60933137,
+    88.82878858, 0, 0, 0, 0, 0, 0, 0, 0])
+
+    dim_to_use_2d = np.array([0, 1, 2, 3, 4, 5, 6, 7, 12, 13, 14, 15, 16, 17, 24, 25, 26, 27, 30, 31, 34, 35, 36, 37, 38, 39, 50, 51, 52, 53, 54, 55])
+
+
+    #train_set_3d, test_set_3d, data_mean_3d, data_std_3d, dim_to_ignore_3d, dim_to_use_3d, train_root_positions, test_root_positions = data_utils.read_3d_data(
+    #actions, FLAGS.data_dir, FLAGS.camera_frame, rcams, FLAGS.predict_14)
 
     while True:
         ret_val, image = cam.read()
@@ -125,9 +165,14 @@ if __name__ == '__main__':
 
         logger.debug('image process+')
         humans = e.inference(image)#2d joints
-        if humans[0] is not None:
+    
+        print(humans)
+
+        if len(humans) > 0:
             ret = converd_skeleton_human(humans[0].get_parts(),image.shape[1],image.shape[0])
             _, _, poses3d = op3dgraph.step(session3d, ret[0], ret[1], ret[2], isTraining=False)#3d skeleton
+            viz.show3Dpose(poses3d, ax, lcolor="#9b59b6", rcolor="#2ecc71")
+            
 
         logger.debug('postprocess+')
         image = TfPoseEstimator.draw_humans(image, humans, imgcopy=False)#draw
