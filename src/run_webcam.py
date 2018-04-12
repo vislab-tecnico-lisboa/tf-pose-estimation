@@ -56,7 +56,8 @@ if __name__ == '__main__':
 
         logger.debug('image process+')
         humans = e.inference(image)
-
+        for human in humans:
+            print(human.get_parts())
         logger.debug('postprocess+')
         image = TfPoseEstimator.draw_humans(image, humans, imgcopy=False)
 

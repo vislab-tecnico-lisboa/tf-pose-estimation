@@ -63,7 +63,11 @@ class Human:
     def __str__(self):
         return ' '.join([str(x) for x in self.body_parts.values()])
 
-
+    def get_parts(self):
+        output = {}
+        for key,value in self.body_parts.items():
+            output[key] = (value.x,value.y)
+        return output
 class BodyPart:
     """
     part_idx : part index(eg. 0 for nose)
