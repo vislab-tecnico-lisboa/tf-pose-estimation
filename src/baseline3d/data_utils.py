@@ -7,8 +7,8 @@ import os
 import numpy as np
 import matplotlib.pyplot as plt
 from mpl_toolkits.mplot3d import Axes3D
-import baseline3d.cameras as cameras
-import baseline3d.viz as viz
+import cameras
+import viz
 import h5py
 import glob
 import copy

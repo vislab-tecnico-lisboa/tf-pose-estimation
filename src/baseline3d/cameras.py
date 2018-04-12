@@ -7,7 +7,7 @@ import h5py
 import numpy as np
 import matplotlib.pyplot as plt
 import matplotlib.image as mpimg
-import baseline3d.data_utils as data_utils
+import data_utils
 import viz
 
 def project_point_radial( P, R, T, f, c, k, p ):

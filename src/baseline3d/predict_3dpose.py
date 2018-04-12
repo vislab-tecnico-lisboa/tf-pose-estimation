@@ -17,20 +17,20 @@ import matplotlib.pyplot as plt
 import numpy as np
 from six.moves import xrange  # pylint: disable=redefined-builtin
 import tensorflow as tf
-import baseline3d.procrustes as procrustes
+import procrustes
 
-import baseline3d.viz as viz
-import baseline3d.cameras as cameras
-import baseline3d.data_utils as data_utils
-import baseline3d.linear_model as linear_model
+import viz
+import cameras
+import data_utils
+import linear_model
 
 tf.app.flags.DEFINE_float("learning_rate", 1e-3, "Learning rate")
-tf.app.flags.DEFINE_float("dropout", 1, "Dropout keep probability. 1 means no dropout")
+tf.app.flags.DEFINE_float("dropout", 0.5, "Dropout keep probability. 1 means no dropout")
 tf.app.flags.DEFINE_integer("batch_size", 64, "Batch size to use during training")
 tf.app.flags.DEFINE_integer("epochs", 200, "How many epochs we should train for")
 tf.app.flags.DEFINE_boolean("camera_frame", False, "Convert 3d poses to camera coordinates")
-tf.app.flags.DEFINE_boolean("max_norm", False, "Apply maxnorm constraint to the weights")
-tf.app.flags.DEFINE_boolean("batch_norm", False, "Use batch_normalization")
+tf.app.flags.DEFINE_boolean("max_norm", True, "Apply maxnorm constraint to the weights")
+tf.app.flags.DEFINE_boolean("batch_norm", True, "Use batch_normalization")
 
 # Data loading
 tf.app.flags.DEFINE_boolean("predict_14", False, "predict 14 joints")
@@ -40,7 +40,7 @@ tf.app.flags.DEFINE_string("action","All", "The action to train on. 'All' means 
 # Architecture
 tf.app.flags.DEFINE_integer("linear_size", 1024, "Size of each model layer.")
 tf.app.flags.DEFINE_integer("num_layers", 2, "Number of layers in the model.")
-tf.app.flags.DEFINE_boolean("residual", False, "Whether to add a residual connection every 2 layers")
+tf.app.flags.DEFINE_boolean("residual", True, "Whether to add a residual connection every 2 layers")
 
 # Evaluation
 tf.app.flags.DEFINE_boolean("procrustes", False, "Apply procrustes analysis at test time")
@@ -51,22 +51,17 @@ tf.app.flags.DEFINE_string("cameras_path","data/h36m/cameras.h5","Directory to l
 tf.app.flags.DEFINE_string("data_dir",   "data/h36m/", "Data directory")
 tf.app.flags.DEFINE_string("train_dir", "experiments", "Training directory.")
 
-# openpose
-tf.app.flags.DEFINE_string("openpose", "openpose_output", "openpose output Data directory")
-tf.app.flags.DEFINE_integer("gif_fps", 30, "output gif framerate")
-tf.app.flags.DEFINE_integer("verbose", 2, "0:Error, 1:Warning, 2:INFO*(default), 3:debug")
-
-
 # Train or load
 tf.app.flags.DEFINE_boolean("sample", False, "Set to True for sampling.")
 tf.app.flags.DEFINE_boolean("use_cpu", False, "Whether to use the CPU")
-tf.app.flags.DEFINE_integer("load", 0, "Try to load a previous checkpoint.")
+tf.app.flags.DEFINE_integer("load", 4874200, "Try to load a previous checkpoint.")
 
 # Misc
 tf.app.flags.DEFINE_boolean("use_fp16", False, "Train using fp16 instead of fp32.")
 
 FLAGS = tf.app.flags.FLAGS
 
+''''
 train_dir = os.path.join( FLAGS.train_dir,
   FLAGS.action,
   'dropout_{0}'.format(FLAGS.dropout),
@@ -81,6 +76,8 @@ train_dir = os.path.join( FLAGS.train_dir,
   'batch_normalization' if FLAGS.batch_norm else 'no_batch_normalization',
   'use_stacked_hourglass' if FLAGS.use_sh else 'not_stacked_hourglass',
   'predict_14' if FLAGS.predict_14 else 'predict_17')
+'''
+train_dir = '3d_model'
 
 print( train_dir )
 summaries_dir = os.path.join( train_dir, "log" ) # Directory for TB summaries

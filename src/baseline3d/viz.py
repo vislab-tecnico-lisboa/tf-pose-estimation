@@ -2,7 +2,7 @@
 """Functions to visualize human poses"""
 
 import matplotlib.pyplot as plt
-import baseline3d.data_utils as data_utils
+import data_utils
 import numpy as np
 import h5py
 import os

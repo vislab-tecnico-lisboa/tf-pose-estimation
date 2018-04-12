@@ -4,11 +4,13 @@ import time
 
 import cv2
 import numpy as np
-
+import sys
+sys.path.append("C:/Users/laura/Downloads/tf-pose-estimation/src/baseline3d")
 from estimator import TfPoseEstimator
 from networks import get_graph_path, model_wh
 import tensorflow as tf
-import baseline3d.predict_3dpose 
+import predict_3dpose
+import data_utils
 FLAGS = tf.app.flags.FLAGS
 
 order = [15, 12, 25, 26, 27, 17, 18, 19, 1, 2, 3, 6, 7, 8]
@@ -96,7 +98,8 @@ if __name__ == '__main__':
     session3d = tf.Session(config=tf.ConfigProto(device_count={"GPU": 1},
            allow_soft_placement=True))
     batch_size = 128
-    op3dgraph = baseline3d.predict_3dpose.create_model(session3d, actions, batch_size)
+    actions = data_utils.define_actions( FLAGS.action );
+    op3dgraph = predict_3dpose.create_model(session3d, actions, batch_size)
 
     logger.debug('cam read+')
     cam = cv2.VideoCapture(args.camera)
@@ -121,13 +124,13 @@ if __name__ == '__main__':
             image = img_scaled[dy:image.shape[0], dx:image.shape[1]]
 
         logger.debug('image process+')
-        humans = e.inference(image)
+        humans = e.inference(image)#2d joints
         if humans[0] is not None:
             ret = converd_skeleton_human(humans[0].get_parts(),image.shape[1],image.shape[0])
-            _, _, poses3d = op3dgraph.step(session3d, ret[0], ret[1], ret[2], isTraining=False)
+            _, _, poses3d = op3dgraph.step(session3d, ret[0], ret[1], ret[2], isTraining=False)#3d skeleton
 
         logger.debug('postprocess+')
-        image = TfPoseEstimator.draw_humans(image, humans, imgcopy=False)
+        image = TfPoseEstimator.draw_humans(image, humans, imgcopy=False)#draw
 
         logger.debug('show+')
         cv2.putText(image,
