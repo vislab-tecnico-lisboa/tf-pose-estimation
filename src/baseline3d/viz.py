@@ -28,6 +28,7 @@ def show3Dpose(channels, ax, lcolor="#3498db", rcolor="#e74c3c", add_labels=Fals
   I   = np.array([1,2,3,1,7,8,1, 13,14,15,14,18,19,14,26,27])-1 # start points
   J   = np.array([2,3,4,7,8,9,13,14,15,16,18,19,20,26,27,28])-1 # end points
   LR  = np.array([1,1,1,0,0,0,0, 0, 0, 0, 0, 0, 0, 1, 1, 1], dtype=bool)
+  print('EU ESTOU AQUI!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!')
   # Make connection matrix
   for i in np.arange( len(I) ):
     x, y, z = [np.array( [vals[I[i], j], vals[J[i], j]] ) for j in range(3)]
